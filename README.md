@@ -1,2 +1,4 @@
 # POCL-HSA
-Portable Computing Language (pocl) aims to become a MIT-licensed open source implementation of the OpenCL standard which can be easily adapted for new targets and devices, both for homogeneous CPU and heterogenous GPUs/accelerators.  pocl uses Clang as an OpenCL C frontend and LLVM for the kernel compiler implementation, and as a portability layer. Thus, if your desired target has an LLVM backend, it should be able to get OpenCL support easily by using pocl.
+Portable Computing Language (pocl) isa  MIT-licensed open source implementation of the OpenCL standard this implementation support HSA Architecture, Runtime and HSAIL LLVM Compiler.   Runtime has is tested withe the AMD OpenCL SDK currently 36 samples from AMD APP SDK 2.8 on AMD Kaveri APU with AMD HSA Runtime 1.0. 
+
+Developed by the Programming Language lab at National Tsing-Hua University, Hsinchu, Taiwan, managed by Prof Jenq-Kuen Lee
