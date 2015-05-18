@@ -1,0 +1,130 @@
+Version roadmap
+---------------
+
+High priority:
+    * make NVIDIA OpenCL SDK examples to work (1.0)
+    * make Intel OpenCL SDK examples to work (1.0)    
+    * make the book examples at 
+      https://code.google.com/p/opencl-book-samples
+      to work (1.0)   
+
+Medium priority:
+    * complete the kernel runtime library.   
+    * complete the host runtime library.
+    * device supporting AMD GPU cards.
+    * Check all the function pointers in the ICD dispatch struct.
+
+Low priority:
+    * gdb target (generates code for any llvm-compatible target and launches.
+      workgroups on gdb simulator).
+    * device supporting IBM Cell BE.
+
+(1.0) == requirement for the pocl 1.0 release
+
+Known missing OpenCL 1.2 features
+---------------------------------
+
+Missing APIs used by the tested OpenCL example suites are
+entered here. This is not a complete list of unimplemented
+APIs in pocl, but one that has been updated whenever 
+missing APIs have been encountered in the test cases.
+
+(*) == Used by the opencl-book-samples. 
+(R) == Used by the Rodinia benchmark suite.
+(P) == Used by pyopencl
+(B) == Used by the Parboil benchmarks
+
+  4. THE OPENCL PLATFORM LAYER
+  
+* 4.1 Querying platform info (properly)
+* 4.3 Partitioning device
+* 4.4 Contexts
+  
+  5. THE OPENCL RUNTIME
+
+* 5.1 Command queues
+* 5.2.1 Creating buffer objects
+* 5.2.4 Mapping buffer objects
+* 5.3 Image objects
+* 5.3.3 Reading, Writing and Copying Image Objects
+* 5.4 Querying, Umapping, Migrating, ... Mem objects
+* 5.4.1 Retaining and Releasing Memory Objects
+* 5.4.2 Unmapping Mapped Memory Objects
+* 5.5 Sampler objects
+* 5.5.1 Creating Sampler Objects
+* 5.6.1 Creating Program Objects
+* 5.7.1 Creating Kernel Objects
+* 5.9 Event objects
+  * clWaitForEvents (*)
+* 5.10 Markers, Barriers and Waiting for Events
+  * clEnqueueMarker (deprecated in OpenCL 1.2) (*, B)
+* 5.12 Profiling 
+
+  6. THE OPENCL C PROGRAMMING LANGUAGE
+
+* 6.12.11 Atomic functions
+  * cl_khr_local_int32_base_atomics (Chapter_14/histogram)
+
+* 6.12.14.2 Built-in Image Read Functions
+  * read_imagef (R[particlefilter])
+  * read_imageui (B[sad])
+
+  OpenCL 1.2 Extensions
+
+* 9.7 Sharing Memory Objects with OpenGL / OpenGL
+  ES Buffer, Texture and Renderbuffer Objects
+* 9.7.6 Sharing memory objects that map to GL objects 
+  between GL and CL contexts
+  * clEnqueueAcquireGLObjects (*)
+
+  Miscellaneous
+
+* Passing structs as values to kernels (P), see
+  https://bugs.launchpad.net/pocl/+bug/987905
+
+Other
+-----
+* configure should check for 'clang'
+* build system should use $(CXX) everywhere,
+  now some parts assume g++ and it fails if 
+  only c++ is installed
+* use the loop vectorizer capabilities of 
+  LLVM 3.2+ by ensuring the wiloop structures are 
+  vectorizable
+* use SPIR as the Clang target to unify ABI etc.
+  to fix the structs-as-values etc. Then a target-specific
+  IR emission phase should exploit target-specific 
+  optimizations (SPIR->POCL KERNEL COMPILER->LLVM IR->ASM?)
+* clear the target/device/host hassle: 
+
+pthread and basic device drivers always use the same CPU as 
+the host. 
+
+Rest of the devices (most likely) require an explicit target 
+anyways (e.g. tce, spu, ...). They use a separately built
+kernel library, but for pthread/dthread the default built
+could be used. 
+
+Per-target overriding of kernel builtin functions should be still 
+kept intact to enable use of target-specif inline assembly and 
+intrinsics for wanted builtin functions. 
+
+If the default kernel library is built we can exploit llc's 
+automatic CPU feature detection and tuning for the kernel library of the 
+current default (the one clang/llvm was compiled for) cpu in
+pthread/basic device drivers. 
+
+
+Optimization opportunities
+--------------------------
+* Even when using an in-order queue, schedule kernels
+  in parallel in case their input buffers are not depending
+  on the unfinished ones (should be legal per OpenCL 1.2 5.11).
+* Compile for-loops without barriers like for-loops with
+  barriers are, to produce better parallelizable code without
+  fully unrolling everything. The difficulty is to detect when
+  it's legal to do so (no diverging work-items when barrier is
+  placed).
+
+  
+  

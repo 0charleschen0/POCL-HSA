@@ -1,0 +1,82 @@
+Requirements
+============
+OS : ubuntu14.04 64-bit edition (or higher)
+APU : AMD A10-7850K APU
+Motherboard : ASUS A88 series motherboard 
+No discrete GPU present in the system
+Libraries :
+  For building pocl
+  * LLVM & Clang 3.3
+  * GNU make
+  * libtool dlopen wrapper files (e.g. libltdl3-dev in Debian)
+  * pthread (should be installed by default)
+  * hwloc v1.0 or newer (e.g. libhwloc-dev)
+  * pkg-config
+  For building HSA environment
+  * HSA-Drivers-Linux-AMD 1.0 (or higher)
+  * HSA-Runtime-AMD 1.0 provisonal (Warning : 1.0f is not compatible so far)
+  * HSAIL-HLC-Stable
+  * CLOC-0.8
+
+Basic Installation
+==================
+The instruction below assumes you reached all requirements.
+For further information about reaching pocl requirements and installing HSA
+environment, you may refer to INSTALL-POCL and https://github.com/HSAFoundation/CLOC/blob/master/INSTALL.md
+
+Executing following command
+`````````````````````````````
+cd {HSA-Runtime-AMD 1.0p path}
+cd sample
+gcc -std=c99 -shared elf_utils.c -o libelf_utils.so
+export the path of libelf_utils.so to LD_LIBRARY_PATH in ~/.bashrc
+cd ..
+mkdir build-pocl
+cd build-pocl
+../{pocl-directory-name}/configure LLVM_CONFIG={llvm-config 3.3 location} CLANG={clang 3.3 location}
+make
+cd ..
+mkdir OpenCL_library
+cd OpenCL_library
+ln -sv {pocl-build path}/pocl-build/CL/.libs/libpocl.so.1.1.0 libOpenCL.so.1
+export LD_LIBRARY_PATH={OpenCL_library path}/OpenCL_library:$LD_LIBRARY_PATH in ~/.bashrc
+//This is used to make OpenCL program to get pocl library
+source ~/.bashrc
+````````````````````````````
+
+Verify
+======
+cd {pocl-build path}/build-pocl/example/example1
+./example1
+
+If command window shows "no version information available."
+This means the installation is sucessfull.
+
+Other Options
+=============
+The default compiler is CLOC.
+You may export HSA_OPENCL2BRIG_COMMAND to specify your own OpenCL to brig(HSAIL binary format) compiler.
+The command is used like this :
+Suppose your compile command is "./compile-opencl test.cl"
+Then export HSA_OPENCL2BRIG_COMMAND="./compile-opencl"
+If the compilation takes several steps, (ex. clang and llc)
+you may write a script file to do it.
+It is user's responsbility to make this script file work like this :
+Executing the command
+````````````````````````````````````````````````
+script-execution-command your-script.sh test.cl
+````````````````````````````````````````````````
+and test.brig is generated in the same directory of test.cl.
+Then you may export HSA_OPENCL2BRIG_COMMAND="script-execution-command your-script.sh"
+
+Known-issues
+============
+1. "clinfo" is unavaliable.
+2. "make check" for pocl is unavaliable.
+3. Image and sampler related APIs are unavaliable.
+4. OpenCL extension like device fission, OpenGL extension and multiGPU is unavailable.
+5. Build option only support -D option. (Compiler Issues)
+6. Get devices with type CL_DEVICE_TYPE_ALL may cause program execution abnormally.
+7. System may crash if using OpenCV OpenCL modules.
+8. Though device is OpenCL 2.0, all OpenCL 2.0 related APIs are unavailable.
+ 

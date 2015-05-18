@@ -1,0 +1,10 @@
+
+AT_BANNER([Runtime library tests])
+
+AT_SETUP([Host runtime tests])
+AT_KEYWORDS([runtime])
+AT_CHECK([$abs_top_builddir/tests/runtime/test_clGetDeviceInfo])
+AT_CHECK([$abs_top_builddir/tests/runtime/test_clGetEventInfo])
+AT_CHECK([$abs_top_builddir/tests/runtime/test_clCreateProgramWithBinary])
+
+AT_CLEANUP
