@@ -26,6 +26,9 @@ environment, you may refer to INSTALL-POCL and https://github.com/HSAFoundation/
 
 Executing following command
 `````````````````````````````
+##Download release-v1.0 from https://github.com/HSAFoundation/HSA-Runtime-AMD/releases
+##and uncompress it
+##Go to the directory you download HSA-Runtime-AMD 1.0 provisonal version
 cd {HSA-Runtime-AMD 1.0p path}
 cd sample
 gcc -std=c99 -shared elf_utils.c -o libelf_utils.so
@@ -36,11 +39,12 @@ cd build-pocl
 ../{pocl-directory-name}/configure LLVM_CONFIG={llvm-config 3.3 location} CLANG={clang 3.3 location}
 make
 cd ..
+##Commands below can be replaced by using OpenCL ICD
 mkdir OpenCL_library
 cd OpenCL_library
-ln -sv {pocl-build path}/pocl-build/CL/.libs/libpocl.so.1.1.0 libOpenCL.so.1
+ln -sv {build-pocl path}/build-pocl/lib/CL/.libs/libpocl.so.1.1.0 libOpenCL.so.1
 export LD_LIBRARY_PATH={OpenCL_library path}/OpenCL_library:$LD_LIBRARY_PATH in ~/.bashrc
-//This is used to make OpenCL program to get pocl library
+##This is used to make OpenCL program to get pocl library
 source ~/.bashrc
 ````````````````````````````
 
