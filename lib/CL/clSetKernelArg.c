@@ -77,11 +77,13 @@ POname(clSetKernelArg)(cl_kernel kernel,
     {
       pocl_aligned_free (p->value);
       p->value = NULL;
+   #ifdef HSA_RUNTIME   
       //By ccchen, if clCreateProgramWithBinary
       if(kernel->program->source==NULL){
     	  kernel->arg_is_pointer[arg_index] = 1;
     	  kernel->arg_is_local[arg_index] = 1;
       }
+   #endif
     }
 
 #if 0
