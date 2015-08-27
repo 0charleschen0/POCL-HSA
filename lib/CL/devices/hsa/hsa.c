@@ -35,6 +35,7 @@
 #include <../dev_image.h>
 #include <sys/time.h>
 
+//Support Image APIs
 const cl_image_format hsa_supported_image_formats[] = {
     { CL_R, CL_SNORM_INT8 },
     { CL_R, CL_SNORM_INT16 },
@@ -210,6 +211,7 @@ pocl_hsa_init (cl_device_id device, const char* parameters)
 
 }
 
+//加上hsa_memort_register
 void *
 pocl_hsa_malloc (void *device_data, cl_mem_flags flags,
 		    size_t size, void *host_ptr)
@@ -393,6 +395,7 @@ pocl_hsa_run
 	  void* local_pointer = kernel->hsaCodeDescriptor->workgroup_group_segment_byte_size;
 	  args_pointer += sizeof(void*) * (kernel->hsaArgCount - kernel->num_args);
 	  if(kernel->num_args > 0){
+//當struct用typedef替代，就沒辦法用抓字串的方式取得了
 		  if(strcmp(kernel->name,"calPriceVega") == 0){
 			  memcpy(args_pointer, &(kernel->dyn_arguments[0].value), sizeof(void*));
 			  args_pointer += sizeof(void*);
@@ -460,12 +463,18 @@ pocl_hsa_run
 				  }
 			  }
 		  }*/
+//general case
 		  else{
 			  for(i=0; i<num_args; i++){
 				  al = &(cmd->command.run.arguments[i]);
 				  if(kernel->arg_is_local[i]){
+//Fix alignment issue
 					  if((uint64_t)(args_pointer-args)%8 !=0)
 						  args_pointer += 8 - (uint64_t)(args_pointer-args)%8;
+//End of alignment issue
+
+//Local argument issue
+//Refer to https://github.com/HSAFoundation/HSA-Runtime-AMD/issues/8
 					  void* p = local_pointer;
 					  memcpy(args_pointer, &p, sizeof(void*));
 					  args_pointer += sizeof(void*);
@@ -474,12 +483,16 @@ pocl_hsa_run
 				  }else if(kernel->arg_is_pointer[i]){// by ccchen, in case array
 					  if((uint64_t)(args_pointer-args)%8 !=0)
 						  args_pointer += 8 - (uint64_t)(args_pointer-args)%8;
-					  if(al->value == NULL){// by ccchen, in case __local array
+//In case of Null array
+					  if(al->value == NULL){
 						  void* p = NULL;
 						  memcpy(args_pointer, &p, sizeof(void*));
 						  args_pointer += sizeof(void*);
-					  }else{// by ccchen, in case cl_mem array
+					  }else{
+// by ccchen, in case cl_mem array
+						  //取出__global *ptr的address
 						  void* p = ((*(cl_mem *) (al->value))->device_ptrs[mem_index]);
+							//把address的值複製到argument buffer
 						  memcpy(args_pointer, &p, sizeof(void*));
 						  args_pointer += sizeof(void*);
 					  }
@@ -493,6 +506,8 @@ pocl_hsa_run
 					  memcpy(args_pointer, &p, sizeof(uint64_t));
 					  args_pointer += sizeof(uint64_t);
 				  }else{ // by ccchen, in case scalar
+//For struct argument
+//HSAIL把struct當一般argument處理
 					  if(kernel->arg_is_struct[i]){
 						  if((uint64_t)(args_pointer-args)%8 !=0)
 							  args_pointer += 8 - (uint64_t)(args_pointer-args)%8;

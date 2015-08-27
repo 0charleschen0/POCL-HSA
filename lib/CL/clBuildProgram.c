@@ -150,6 +150,7 @@ POname(clBuildProgram)(cl_program program,
 		  hsa_status_t err;
 		  char str[65535];
 		  char * command;
+//compile kernel code to hsail by CLOC
 		  if((command = getenv("HSA_OPENCL2BRIG_COMMAND")) != NULL){
 			  sprintf(str,"%s %s",command,source_file_name);
 		  }else{
@@ -349,6 +350,7 @@ POname(clBuildProgram)(cl_program program,
         {
           cl_device_id device = real_device_list[device_i];
 #ifdef HSA_RUNTIME
+//Load program from clCreateProgramFromBinary
           if(device->type&CL_DEVICE_TYPE_GPU){
     		  //by ccchen, copy .brig file to /tmp/poclxxx/program.brig
     		  hsa_status_t err;
@@ -359,6 +361,7 @@ POname(clBuildProgram)(cl_program program,
     		  fclose (binary_file);
     		  err = create_brig_module_from_brig_file(binary_file_name, &(program->brigModule));
     		  char command[COMMAND_LENGTH];
+//把brig翻成hsail
     		  sprintf(command,"hsailasm -disassemble %s",binary_file_name);
     		  system(command);
 #ifndef DEBUG

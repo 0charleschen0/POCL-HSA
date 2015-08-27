@@ -107,7 +107,7 @@ POname(clCreateProgramWithSource)(cl_context context,
   strcpy(source_copy, program->source);
   i = 0;
   int status = 0, j = 0;
-  //Remove comment by FSM
+  //Remove comments by FSM
   while(source_copy[i] != '\0'){
   #if 0
   			  printf("%c %d",source_copy[i],status);

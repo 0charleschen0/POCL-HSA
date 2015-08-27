@@ -178,7 +178,6 @@ POname(clCreateKernel)(cl_program program,
 #if defined HSA_RUNTIME
       if(program->devices[device_i]->type&CL_DEVICE_TYPE_GPU){
     	  hsa_status_t err;
-		  //TODO:by ccchen, Can It Support Several Kernels?
 		  /*
 		   * Construct finalization request list.
 		   */
@@ -217,6 +216,7 @@ POname(clCreateKernel)(cl_program program,
 #endif
 		  check(Querying the kernel descriptor address, err);
       }else
+//End of finalize kernel
 #endif
       { snprintf (device_tmpdir, POCL_FILENAME_LENGTH, "%s/%s",
 					program->temp_dir, program->devices[device_i]->name);
@@ -300,6 +300,7 @@ POname(clCreateKernel)(cl_program program,
   kernel->function_name = strdup(kernel_name);
   kernel->name = strdup(kernel_name);
 #if defined HSA_RUNTIME
+// Initialize
   if(program->devices[0]->type&CL_DEVICE_TYPE_GPU){
 	  kernel->num_locals = 0;
 	  kernel->reqd_wg_size = (int*)malloc(3*sizeof(int));
@@ -353,6 +354,7 @@ POname(clCreateKernel)(cl_program program,
 #ifdef DEBUG
 			  printf("%s\n",str_arg);
 #endif
+//抓argument的type
 			  for(i=0; i<num_args; i++){
 				if(i == 0){ argName = strtok(str_arg, ",");}
 				else if(i == num_args - 1){ argName = strtok(NULL,","); argName = strtok(argName,"{");}
@@ -433,6 +435,7 @@ POname(clCreateKernel)(cl_program program,
 		  int num_args = 1; //Jump to real argument
 		  char* temp = (char*)malloc((strlen(str)+1)*sizeof(char));
 		  memset(temp, 0, (strlen(str)+1)*sizeof(char));
+//去掉CLOC compiler多加的argument
 		  if(strstr(str, "aqlwrap_pointer,") != NULL){
 			  str = strstr(str, "aqlwrap_pointer,");
 #ifdef DEBUG
@@ -472,6 +475,7 @@ POname(clCreateKernel)(cl_program program,
 #ifdef DEBUG
 		  printf("%s\n",str_arg);
 #endif
+//clCreateProgramWithBinary 只能抓到pointer和scalar
 		  for(i=0; i<num_args; i++){
 			if(i == 0){ argName = strtok(str_arg, ",");}
 			else if(i == num_args - 1){ argName = strtok(NULL,","); argName = strtok(argName,"{");}
